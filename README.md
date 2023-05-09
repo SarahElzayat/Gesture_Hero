@@ -1,1 +1,1 @@
-# NN-PROJECT-
+# Hand Gesture Classification
