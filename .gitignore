@@ -6,3 +6,10 @@ dataset/**
 **.pkl
 **.csv
 /Dataset_0-5
+Image-Segmentation1/**
+Image-Segmentation2/**
+grey/**
+grey-tany/**
+Binary/**
+Binary2/**
+New folder/**
