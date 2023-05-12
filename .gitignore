@@ -6,3 +6,7 @@ dataset/**
 **.pkl
 **.csv
 /Dataset_0-5
+/Feature-Extraction
+/sara-dataset
+/doaa-dataset
+/Image-Segmentation-sara
