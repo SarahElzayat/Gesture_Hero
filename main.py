@@ -1,18 +1,13 @@
 # %%
-import sys
 import os
 import time
 import numpy as np
 import cv2 as cv2
 from scipy import ndimage as ndi
 from skimage import feature
-import pandas as pd
-from sklearn import svm
 import seaborn as sns
-import collections
 import joblib
-sns.set()
-
+import imghdr
 
 def should_flip(img):
     a = img.sum(axis=0)
@@ -54,11 +49,10 @@ def preprocess(img_rgb):
 
 out_labels_file = r'results.txt'
 out_time_file = r'time.txt'
-correct_file = r'noman_labels.txt'
 path_to_data = "test_data_2/"
 
-clf = joblib.load(r'Classifiers\SVM-POLY.pkl')
-clf_3_4 = joblib.load(r'./Classifiers/SVM-POLY_2_3_4.pkl')
+clf = joblib.load(r'SVM-POLY.pkl')
+clf_3_4 = joblib.load(r'SVM-POLY_2_3_4.pkl')
 # path = "test_data/"
 # labels_file = r'labels.txt'
 
@@ -106,38 +100,6 @@ def DoItAll():
     with open(out_time_file, 'w') as f:
         for item in times:
             f.write("%.3f\n" % item)
-
-# compare labels values with values in correct.txt
-    wrong = 0
-
-    wrong_Counter = collections.Counter()
-    with open(correct_file, 'r') as f:
-        correct_labels = f.readlines()
-        correct_labels = [x.strip() for x in correct_labels]
-        for i in range(len(labels)):
-            # print(labels[i], correct_labels[i])
-            if int(labels[i]) != int(correct_labels[i]):
-                wrong += 1
-                # print('wrong at: ', i)
-                # print('label: ', labels[i], 'correct: ', correct_labels[i])
-                wrong_Counter[correct_labels[i]] += 1
-    print(wrong_Counter)
-
-    print("wrong: ", wrong)
-    print("accuracy: ", (len(labels) - wrong) / len(labels))
-
-# %%
-
-# folder_path = "./test_set_2/"  # Specify the path to your folder
-
-# files = os.listdir(folder_path)
-
-# for index, file_name in enumerate(files):
-#     new_file_name = file_name.replace('(', '').replace(')', '')
-#     old_file_path = os.path.join(folder_path, file_name)
-#     new_file_path = os.path.join(folder_path, new_file_name)
-#     os.rename(old_file_path, new_file_path)
-
 
 # %%
 if __name__ == "__main__":

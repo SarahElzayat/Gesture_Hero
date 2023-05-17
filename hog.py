@@ -1,4 +1,5 @@
 # %%
+import time
 from tqdm import tqdm
 from sklearn.linear_model import SGDClassifier
 from sklearn.naive_bayes import GaussianNB
@@ -42,10 +43,10 @@ base = './'
 
 def plt_t(title, img, cmap=None):
     plt.imshow(img, cmap=cmap)
-    plt.title(title) 
+    plt.title(title)
     plt.show()
 
- 
+
 def segm_1(img_rgb):
     img_ycrcb = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2YCR_CB)
     ycrcbmin = np.array((0, 133, 77))
@@ -86,7 +87,7 @@ def segm_9(img):
     masked_data = cv2.resize(masked_data, (128*2, 64*2))
     if should_flip(trr2):
         masked_data = cv2.flip(masked_data, 1)
-        maske = cv2.flip(maske,1)
+        maske = cv2.flip(maske, 1)
     return cv2.cvtColor(masked_data, cv2.COLOR_BGR2GRAY), maske*255
 
 
@@ -250,7 +251,7 @@ HOG_PCA()
 # implement local binary pattern
 def LBP_HOG():
     # here we will combine the lbp and hog features in one feature vector
-    file  = open(r"./Feature-Extraction/Histogram-of-Oriented-Gradients.txt", "w")
+    file = open(r"./Feature-Extraction/Histogram-of-Oriented-Gradients.txt", "w")
     lstFiles = []  # nombre de imagenes
     labels = []
     feature_vectors = []
@@ -270,40 +271,27 @@ def LBP_HOG():
 
                 # now we will implement the local binary pattern on the image
                 # then we will implement the hog on the lbp image
-                lbp = local_binary_pattern(image, 21, 8, method="uniform") # 24 represents the number of points to be considered in the radius - 8 represents the radius of the circle
-                hist,bins = np.histogram(lbp.ravel(),256,[0,256],True)
-
+                # 24 represents the number of points to be considered in the radius - 8 represents the radius of the circle
+                lbp = local_binary_pattern(image, 21, 8, method="uniform")
+                hist, bins = np.histogram(lbp.ravel(), 256, [0, 256], True)
 
                 (H) = feature.hog(image, orientations=9,  pixels_per_cell=(16, 16),
                                   cells_per_block=(2, 2), block_norm='L2-Hys', feature_vector=True)
-                
 
                 # store both the lbp and hog features in one feature vector
 
-               
                 feature_vector = np.concatenate((hist, H), axis=None)
                 feature_vectors.append(feature_vector)
 
                 labels.append(name[0])
-                
-                # print(feature_vector)
-                # print("----------------------------------")
-                
 
-                # now we will store the features of both lbp and hog in one feature vector
-                # we will store the features in a csv file
-                # we will store the label of the image in the csv file
-                # we will store the label of the image in the csv file
-
-
-
-                    
                 file.write(name)
                 for item in range(len(feature_vector)):
                     file.write(",%.3f" % feature_vector[item])
                 file.write("," + name[0] + "\n")
     file.close()
     return feature_vectors, labels
+
 
 feature_vector, labels = LBP_HOG()
 
@@ -318,7 +306,7 @@ def TRY_classifiers(txt, test):
     # create folder Classifiers if not exist
     if not os.path.exists(base + 'Classifiers/'):
         os.makedirs(base + 'Classifiers/')
-    
+
     data = pd.read_csv(base + 'Feature-Extraction/' +
                        txt+'.txt', sep=',', header=None)
     data = shuffle(data, random_state=0)
@@ -354,9 +342,11 @@ def TRY_classifiers(txt, test):
 
     tags = data[col[-1]]  # columna de tags
 
-    value_2_3_4 = value[np.logical_or(np.logical_or( tags == '4' , tags == '3'),tags == '2')] 
-    tags_2_3_4 = tags[np.logical_or(np.logical_or( tags == '4' , tags == '3'  ),tags == '2')]
-    # value_2_3_4 = value[np.logical_or( tags == '4' , tags == '3')] 
+    value_2_3_4 = value[np.logical_or(
+        np.logical_or(tags == '4', tags == '3'), tags == '2')]
+    tags_2_3_4 = tags[np.logical_or(np.logical_or(
+        tags == '4', tags == '3'), tags == '2')]
+    # value_2_3_4 = value[np.logical_or( tags == '4' , tags == '3')]
     # tags_2_3_4 = tags[np.logical_or( tags == '4' , tags == '3'  )]
     print(value_2_3_4.shape)
     X_train, X_test, Y_train, Y_test = train_test_split(
@@ -371,14 +361,16 @@ def TRY_classifiers(txt, test):
     ), Pipeline(steps=[('scaler', StandardScaler()), ('SGD', SGDClassifier(loss="hinge", penalty="l2"))])]
     names = ["Random Forest", "Naive Bayes",
              "SVM-RBF", "SVM-POLY", "KNN", "SGDClassifier"]
-    
+
     for i, clf in enumerate(classfiers):
         clf.fit(X_train_2_3_4.values, Y_train_2_3_4.values)
         joblib.dump(clf, base + r'Classifiers/'+names[i] + '_2_3_4.pkl')
         print("Classifier: "+str(names[i]))
         y_pred = clf.predict(X_test_2_3_4.values)
-        print("Accuracy of small model: "+str(np.sum(y_pred == Y_test_2_3_4)/len(Y_test_2_3_4)))
-        conf_mat = confusion_matrix(Y_test_2_3_4, clf.predict(X_test_2_3_4.values))
+        print("Accuracy of small model: " +
+              str(np.sum(y_pred == Y_test_2_3_4)/len(Y_test_2_3_4)))
+        conf_mat = confusion_matrix(
+            Y_test_2_3_4, clf.predict(X_test_2_3_4.values))
         plt.figure(figsize=(5, 5))
         plt.title("Confusion matrix for "+str(names[i])+" classifier    "+txt)
         # save confusion matrix
@@ -386,15 +378,22 @@ def TRY_classifiers(txt, test):
         plt.savefig(base + r'Classifiers/'+names[i] + '_2_3_4.png')
 
     clf_2_3_4 = joblib.load(base + r'Classifiers/'+names[0] + '_2_3_4.pkl')
+    fits_times = [[],[],[],[],[],[]] 
+    predicts_times = [[],[],[],[],[],[]] 
     for i, clf in enumerate(classfiers):
+        start = time.time()
         clf.fit(X_train.values, Y_train.values)
-        joblib.dump(clf, base +r'Classifiers/'+ names[i] + '.pkl')
+        fits_times[i].append(time.time() - start)
+        joblib.dump(clf, base + r'Classifiers/' + names[i] + '.pkl')
         print("Classifier: "+str(names[i]))
+        start = time.time()
         y_pred = clf.predict(X_test.values)
+        predicts_times[i].append(time.time() - start)
         y_pred[y_pred == '4'] = clf_2_3_4.predict(X_test.values[y_pred == '4'])
         y_pred[y_pred == '2'] = clf_2_3_4.predict(X_test.values[y_pred == '2'])
         y_pred[y_pred == '3'] = clf_2_3_4.predict(X_test.values[y_pred == '3'])
-        print("Accuracy of classifiers: "+str(np.sum(y_pred == Y_test)/len(Y_test)))
+        print("Accuracy of classifiers: " +
+              str(np.sum(y_pred == Y_test)/len(Y_test)))
         conf_mat = confusion_matrix(Y_test, clf.predict(X_test.values))
         plt.figure(figsize=(5, 5))
         plt.title("Confusion matrix for "+str(names[i])+" classifier    "+txt)
@@ -402,18 +401,38 @@ def TRY_classifiers(txt, test):
         sns.heatmap(conf_mat, annot=True, fmt='d', cmap=plt.cm.copper)
         plt.savefig(base + r'Classifiers/'+names[i] + '.png')
 
+    # print the models with corresponding times
+    print("Fitting times")
+    print(fits_times)
+    for i in range(len(names)):
+        print(names[i] + ": " + str(fits_times[i]))
+    print("Predicting times")
+    for i in range(len(names)): 
+        print(names[i] + ": " + str(predicts_times[i]))
+    # draw the times with the corresponding tags
+    plt.figure(figsize=(5, 5))
+    plt.title("Fitting times")
+    plt.bar(names, [fits_times[i][0] for i in range(len(names))])
+    plt.savefig(base + r'Classifiers/Fitting_times.png')
+    plt.figure(figsize=(5, 5))
+    plt.title("Predicting times")
+    plt.bar(names, [predicts_times[i][0] for i in range(len(names))])
+    plt.savefig(base + r'Classifiers/Predicting_times.png')
+    
+    
     # voting classifier
     # clf1 = ('svm',svm.SVC(kernel='poly',probability=True))
     # clf2 = ('rf',RandomForestClassifier())
     # clf3 = ('SGD', SGDClassifier(loss="hinge", penalty="l2"))
     # estimators = [clf1, clf2, clf3]
-    
+
     # voting_clf = VotingClassifier(estimators=estimators, voting='hard')
     # voting_clf.fit(X_train.values, Y_train.values)
     # joblib.dump(voting_clf, base + r'Classifiers/Voting.pkl')
     # y_pred = voting_clf.predict(X_test.values)
-    # print("Accuracy of voting classifier: "+str(np.sum(y_pred == Y_test)/len(Y_test)))    
-    
+    # print("Accuracy of voting classifier: "+str(np.sum(y_pred == Y_test)/len(Y_test)))
+
+
 # porcentaje_test=[0.30,0.25,0.20]
 # NN("Elliptic-Fourier",porcentaje_test[1]
 # TRY_classifiers("hinge",0.2)
@@ -422,3 +441,5 @@ TRY_classifiers("Histogram-of-Oriented-Gradients", 0.2)
 # TRY_classifiers("Histogram-of-Oriented-Gradients-PCA",0.2)
 # RandomForest("Elliptic-Fourier",0.2)
 # RandomForest("pca",0.2)
+
+# %%
