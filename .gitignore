@@ -28,6 +28,8 @@ test_test_seg/**
 **.rar
 kamal/**
 kamal_seg/**
+dataset_segmented/**
 /test_data
 /Image-Segmentation-masks
 us/**
+New folder/**
