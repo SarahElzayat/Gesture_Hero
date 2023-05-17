@@ -256,7 +256,10 @@ base = "./"
 
 
 def TRY_classifiers(txt, test):
-
+    # create folder Classifiers if not exist
+    if not os.path.exists(base + 'Classifiers/'):
+        os.makedirs(base + 'Classifiers/')
+    
     data = pd.read_csv(base + 'Feature-Extraction/' +
                        txt+'.txt', sep=',', header=None)
     data = shuffle(data, random_state=0)
@@ -292,24 +295,53 @@ def TRY_classifiers(txt, test):
 
     tags = data[col[-1]]  # columna de tags
 
+    value_2_3 = value[np.logical_or(np.logical_or( tags == '4' , tags == '3'),tags == '2')] 
+    tags_2_3 = tags[np.logical_or(np.logical_or( tags == '4' , tags == '3'  ),tags == '2')]
+    # value_2_3 = value[np.logical_or( tags == '4' , tags == '3')] 
+    # tags_2_3 = tags[np.logical_or( tags == '4' , tags == '3'  )]
+    print(value_2_3.shape)
     X_train, X_test, Y_train, Y_test = train_test_split(
         value, tags, test_size=test, random_state=0)
+
+    X_train_2_3, X_test_2_3, Y_train_2_3, Y_test_2_3 = train_test_split(
+        value_2_3, tags_2_3, test_size=test, random_state=0)
 
     print('dim' + str(X_train.shape))
     # try different classifiers
     classfiers = [RandomForestClassifier(), GaussianNB(), svm.SVC(kernel='rbf'), svm.SVC(kernel='poly'), KNeighborsClassifier(
-    ), Pipeline(steps=[('scaler', StandardScaler()), ('SVC', SGDClassifier(loss="hinge", penalty="l2"))])]
+    ), Pipeline(steps=[('scaler', StandardScaler()), ('SGD', SGDClassifier(loss="hinge", penalty="l2"))])]
     names = ["Random Forest", "Naive Bayes",
              "SVM-RBF", "SVM-POLY", "KNN", "SGDClassifier"]
+    
+    for i, clf in enumerate(classfiers):
+        clf.fit(X_train_2_3.values, Y_train_2_3.values)
+        joblib.dump(clf, base + r'Classifiers/'+names[i] + '_2_3.pkl')
+        print("Classifier: "+str(names[i]))
+        y_pred = clf.predict(X_test_2_3.values)
+        print("Accuracy of small model: "+str(np.sum(y_pred == Y_test_2_3)/len(Y_test_2_3)))
+        conf_mat = confusion_matrix(Y_test_2_3, clf.predict(X_test_2_3.values))
+        plt.figure(figsize=(5, 5))
+        plt.title("Confusion matrix for "+str(names[i])+" classifier    "+txt)
+        # save confusion matrix
+        sns.heatmap(conf_mat, annot=True, fmt='d', cmap=plt.cm.copper)
+        plt.savefig(base + r'Classifiers/'+names[i] + '_2_3.png')
+
+    clf_2_3 = joblib.load(base + r'Classifiers/'+names[0] + '_2_3.pkl')
     for i, clf in enumerate(classfiers):
         clf.fit(X_train.values, Y_train.values)
         joblib.dump(clf, base + names[i] + '.pkl')
         print("Classifier: "+str(names[i]))
-        print("Accuracy: "+str(clf.score(X_test.values, Y_test.values)))
+        y_pred = clf.predict(X_test.values)
+        y_pred[y_pred == '4'] = clf_2_3.predict(X_test.values[y_pred == '4'])
+        y_pred[y_pred == '2'] = clf_2_3.predict(X_test.values[y_pred == '2'])
+        y_pred[y_pred == '3'] = clf_2_3.predict(X_test.values[y_pred == '3'])
+        print("Accuracy of classifiers: "+str(np.sum(y_pred == Y_test)/len(Y_test)))
         conf_mat = confusion_matrix(Y_test, clf.predict(X_test.values))
         plt.figure(figsize=(5, 5))
         plt.title("Confusion matrix for "+str(names[i])+" classifier    "+txt)
+        # save confusion matrix
         sns.heatmap(conf_mat, annot=True, fmt='d', cmap=plt.cm.copper)
+        plt.savefig(base + r'Classifiers/'+names[i] + '.png')
 
 
 # porcentaje_test=[0.30,0.25,0.20]
@@ -320,3 +352,5 @@ TRY_classifiers("Histogram-of-Oriented-Gradients", 0.2)
 # TRY_classifiers("Histogram-of-Oriented-Gradients-PCA",0.2)
 # RandomForest("Elliptic-Fourier",0.2)
 # RandomForest("pca",0.2)
+
+# %%
