@@ -322,7 +322,9 @@ def TRY_classifiers(txt, test):
         conf_mat = confusion_matrix(Y_test_2_3, clf.predict(X_test_2_3.values))
         plt.figure(figsize=(5, 5))
         plt.title("Confusion matrix for "+str(names[i])+" classifier    "+txt)
+        # save confusion matrix
         sns.heatmap(conf_mat, annot=True, fmt='d', cmap=plt.cm.copper)
+        plt.savefig(base + r'Classifiers/'+names[i] + '_2_3.png')
 
     clf_2_3 = joblib.load(base + r'Classifiers/'+names[0] + '_2_3.pkl')
     for i, clf in enumerate(classfiers):
@@ -337,7 +339,9 @@ def TRY_classifiers(txt, test):
         conf_mat = confusion_matrix(Y_test, clf.predict(X_test.values))
         plt.figure(figsize=(5, 5))
         plt.title("Confusion matrix for "+str(names[i])+" classifier    "+txt)
+        # save confusion matrix
         sns.heatmap(conf_mat, annot=True, fmt='d', cmap=plt.cm.copper)
+        plt.savefig(base + r'Classifiers/'+names[i] + '.png')
 
 
 # porcentaje_test=[0.30,0.25,0.20]
