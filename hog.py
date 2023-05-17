@@ -28,8 +28,10 @@ import seaborn as sns
 import joblib
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from scipy.stats import skew
 from skimage.filters import sobel
+from skimage.feature import local_binary_pattern
 sns.set()
 np.random.seed(42)
 
@@ -136,7 +138,6 @@ def ImageSegmentation():
                 direc = path + "/" + nomArch + ext
                 name = nomArch + ext
                 print(path + "/" + nomArch + ext)
-
                 holesimg, mask = preprocess(direc)
                 if (holesimg is None):
                     continue
@@ -204,7 +205,7 @@ def HOG():
                 img_binary = cv2.imread(direc)
 
                 (H) = feature.hog(img_binary, orientations=9,  pixels_per_cell=(16, 16),
-                                  cells_per_block=(3, 3), block_norm='L2-Hys', feature_vector=True, channel_axis=-1)  # ,visualize=True
+                                  cells_per_block=(2, 2), block_norm='L2-Hys', feature_vector=True, channel_axis=-1)  # ,visualize=True
                 # plt_t('hog', himg)
                 # hogImage = exposure.rescale_intensity(hogImage, out_range=(0, 255))     ,hogImage
                 # hogImage = hogImage.astype("uint8")
@@ -222,31 +223,89 @@ HOG_PCA()
 
 # The Histogram of Oriented Gradients features are extracted from each of the images and we proceed to save them in a. txt file
 # %%
-p5 = r'.\Image-Segmentation\5_woman (91).JPG'
-img = cv2.imread(p5)
-img_bw = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-_, img_bw = cv2.threshold(img_bw, 127, 255, 0)
-(H) = feature.hog(img_bw, orientations=9, pixels_per_cell=(16, 16), cells_per_block=(2, 2),
-                  block_norm="L1")
-# plt_t('HOG',hi)
+# p5 = r'.\Image-Segmentation\5_woman (91).JPG'
+# img = cv2.imread(p5)
+# img_bw = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# _, img_bw = cv2.threshold(img_bw, 127, 255, 0)
+# (H) = feature.hog(img_bw, orientations=9, pixels_per_cell=(16, 16), cells_per_block=(2, 2),
+#                   block_norm="L1")
+# # plt_t('HOG',hi)
 
-contours, hier = cv2.findContours(
-    img_bw, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-maxcontour = max(contours, key=cv2.contourArea)
-cv2.drawContours(img, [maxcontour], 0, (255, 9, 9))
-plt_t('cont', img)
-# crop the bounding rect of the contour
-x, y, w, h = cv2.boundingRect(maxcontour)
-crop = img[y:y+h, x:x+w]
-plt_t('crop', crop)
-crop = cv2.resize(crop, (128, 64))
-# rotate the crop
-crop = cv2.rotate(crop, cv2.ROTATE_90_CLOCKWISE)
-plt_t('crop', crop)
+# contours, hier = cv2.findContours(
+#     img_bw, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+# maxcontour = max(contours, key=cv2.contourArea)
+# cv2.drawContours(img, [maxcontour], 0, (255, 9, 9))
+# plt_t('cont', img)
+# # crop the bounding rect of the contour
+# x, y, w, h = cv2.boundingRect(maxcontour)
+# crop = img[y:y+h, x:x+w]
+# plt_t('crop', crop)
+# crop = cv2.resize(crop, (128, 64))
+# # rotate the crop
+# crop = cv2.rotate(crop, cv2.ROTATE_90_CLOCKWISE)
+# plt_t('crop', crop)
 
 
 # %%
+# implement local binary pattern
+def LBP_HOG():
+    # here we will combine the lbp and hog features in one feature vector
+    file  = open(r"./Feature-Extraction/Histogram-of-Oriented-Gradients.txt", "w")
+    lstFiles = []  # nombre de imagenes
+    labels = []
+    feature_vectors = []
+    path = r"./Image-Segmentation/"
+    for (path, _, archivos) in walk(path):
+        for arch in archivos:
+            (nomArch, ext) = os.path.splitext(arch)
+            if (ext == ".JPG"):
+                lstFiles.append(nomArch + ext)
+                direc = path + "/" + nomArch + ext
+                name = nomArch + ext
+                img_binary = cv2.imread(direc)
 
+                image = cv2.imread(path + arch)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                image = cv2.resize(image, (461, 260))
+
+                # now we will implement the local binary pattern on the image
+                # then we will implement the hog on the lbp image
+                lbp = local_binary_pattern(image, 21, 8, method="uniform") # 24 represents the number of points to be considered in the radius - 8 represents the radius of the circle
+                hist,bins = np.histogram(lbp.ravel(),256,[0,256],True)
+
+
+                (H) = feature.hog(image, orientations=9,  pixels_per_cell=(16, 16),
+                                  cells_per_block=(2, 2), block_norm='L2-Hys', feature_vector=True)
+                
+
+                # store both the lbp and hog features in one feature vector
+
+               
+                feature_vector = np.concatenate((hist, H), axis=None)
+                feature_vectors.append(feature_vector)
+
+                labels.append(name[0])
+                
+                # print(feature_vector)
+                # print("----------------------------------")
+                
+
+                # now we will store the features of both lbp and hog in one feature vector
+                # we will store the features in a csv file
+                # we will store the label of the image in the csv file
+                # we will store the label of the image in the csv file
+
+
+
+                    
+                file.write(name)
+                for item in range(len(feature_vector)):
+                    file.write(",%.3f" % feature_vector[item])
+                file.write("," + name[0] + "\n")
+    file.close()
+    return feature_vectors, labels
+
+feature_vector, labels = LBP_HOG()
 
 # %%
 
@@ -295,16 +354,16 @@ def TRY_classifiers(txt, test):
 
     tags = data[col[-1]]  # columna de tags
 
-    value_2_3 = value[np.logical_or(np.logical_or( tags == '4' , tags == '3'),tags == '2')] 
-    tags_2_3 = tags[np.logical_or(np.logical_or( tags == '4' , tags == '3'  ),tags == '2')]
-    # value_2_3 = value[np.logical_or( tags == '4' , tags == '3')] 
-    # tags_2_3 = tags[np.logical_or( tags == '4' , tags == '3'  )]
-    print(value_2_3.shape)
+    value_2_3_4 = value[np.logical_or(np.logical_or( tags == '4' , tags == '3'),tags == '2')] 
+    tags_2_3_4 = tags[np.logical_or(np.logical_or( tags == '4' , tags == '3'  ),tags == '2')]
+    # value_2_3_4 = value[np.logical_or( tags == '4' , tags == '3')] 
+    # tags_2_3_4 = tags[np.logical_or( tags == '4' , tags == '3'  )]
+    print(value_2_3_4.shape)
     X_train, X_test, Y_train, Y_test = train_test_split(
         value, tags, test_size=test, random_state=0)
 
-    X_train_2_3, X_test_2_3, Y_train_2_3, Y_test_2_3 = train_test_split(
-        value_2_3, tags_2_3, test_size=test, random_state=0)
+    X_train_2_3_4, X_test_2_3_4, Y_train_2_3_4, Y_test_2_3_4 = train_test_split(
+        value_2_3_4, tags_2_3_4, test_size=test, random_state=0)
 
     print('dim' + str(X_train.shape))
     # try different classifiers
@@ -314,27 +373,27 @@ def TRY_classifiers(txt, test):
              "SVM-RBF", "SVM-POLY", "KNN", "SGDClassifier"]
     
     for i, clf in enumerate(classfiers):
-        clf.fit(X_train_2_3.values, Y_train_2_3.values)
-        joblib.dump(clf, base + r'Classifiers/'+names[i] + '_2_3.pkl')
+        clf.fit(X_train_2_3_4.values, Y_train_2_3_4.values)
+        joblib.dump(clf, base + r'Classifiers/'+names[i] + '_2_3_4.pkl')
         print("Classifier: "+str(names[i]))
-        y_pred = clf.predict(X_test_2_3.values)
-        print("Accuracy of small model: "+str(np.sum(y_pred == Y_test_2_3)/len(Y_test_2_3)))
-        conf_mat = confusion_matrix(Y_test_2_3, clf.predict(X_test_2_3.values))
+        y_pred = clf.predict(X_test_2_3_4.values)
+        print("Accuracy of small model: "+str(np.sum(y_pred == Y_test_2_3_4)/len(Y_test_2_3_4)))
+        conf_mat = confusion_matrix(Y_test_2_3_4, clf.predict(X_test_2_3_4.values))
         plt.figure(figsize=(5, 5))
         plt.title("Confusion matrix for "+str(names[i])+" classifier    "+txt)
         # save confusion matrix
         sns.heatmap(conf_mat, annot=True, fmt='d', cmap=plt.cm.copper)
-        plt.savefig(base + r'Classifiers/'+names[i] + '_2_3.png')
+        plt.savefig(base + r'Classifiers/'+names[i] + '_2_3_4.png')
 
-    clf_2_3 = joblib.load(base + r'Classifiers/'+names[0] + '_2_3.pkl')
+    clf_2_3_4 = joblib.load(base + r'Classifiers/'+names[0] + '_2_3_4.pkl')
     for i, clf in enumerate(classfiers):
         clf.fit(X_train.values, Y_train.values)
-        joblib.dump(clf, base + names[i] + '.pkl')
+        joblib.dump(clf, base +r'Classifiers/'+ names[i] + '.pkl')
         print("Classifier: "+str(names[i]))
         y_pred = clf.predict(X_test.values)
-        y_pred[y_pred == '4'] = clf_2_3.predict(X_test.values[y_pred == '4'])
-        y_pred[y_pred == '2'] = clf_2_3.predict(X_test.values[y_pred == '2'])
-        y_pred[y_pred == '3'] = clf_2_3.predict(X_test.values[y_pred == '3'])
+        y_pred[y_pred == '4'] = clf_2_3_4.predict(X_test.values[y_pred == '4'])
+        y_pred[y_pred == '2'] = clf_2_3_4.predict(X_test.values[y_pred == '2'])
+        y_pred[y_pred == '3'] = clf_2_3_4.predict(X_test.values[y_pred == '3'])
         print("Accuracy of classifiers: "+str(np.sum(y_pred == Y_test)/len(Y_test)))
         conf_mat = confusion_matrix(Y_test, clf.predict(X_test.values))
         plt.figure(figsize=(5, 5))
@@ -343,7 +402,18 @@ def TRY_classifiers(txt, test):
         sns.heatmap(conf_mat, annot=True, fmt='d', cmap=plt.cm.copper)
         plt.savefig(base + r'Classifiers/'+names[i] + '.png')
 
-
+    # voting classifier
+    # clf1 = ('svm',svm.SVC(kernel='poly',probability=True))
+    # clf2 = ('rf',RandomForestClassifier())
+    # clf3 = ('SGD', SGDClassifier(loss="hinge", penalty="l2"))
+    # estimators = [clf1, clf2, clf3]
+    
+    # voting_clf = VotingClassifier(estimators=estimators, voting='hard')
+    # voting_clf.fit(X_train.values, Y_train.values)
+    # joblib.dump(voting_clf, base + r'Classifiers/Voting.pkl')
+    # y_pred = voting_clf.predict(X_test.values)
+    # print("Accuracy of voting classifier: "+str(np.sum(y_pred == Y_test)/len(Y_test)))    
+    
 # porcentaje_test=[0.30,0.25,0.20]
 # NN("Elliptic-Fourier",porcentaje_test[1]
 # TRY_classifiers("hinge",0.2)
@@ -352,5 +422,3 @@ TRY_classifiers("Histogram-of-Oriented-Gradients", 0.2)
 # TRY_classifiers("Histogram-of-Oriented-Gradients-PCA",0.2)
 # RandomForest("Elliptic-Fourier",0.2)
 # RandomForest("pca",0.2)
-
-# %%
