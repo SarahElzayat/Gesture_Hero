@@ -256,7 +256,10 @@ base = "./"
 
 
 def TRY_classifiers(txt, test):
-
+    # create folder Classifiers if not exist
+    if not os.path.exists(base + 'Classifiers/'):
+        os.makedirs(base + 'Classifiers/')
+    
     data = pd.read_csv(base + 'Feature-Extraction/' +
                        txt+'.txt', sep=',', header=None)
     data = shuffle(data, random_state=0)
