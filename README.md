@@ -1,8 +1,7 @@
 
 <h1 align="center" id="title">Gesture Hero</h1>
 
-
-![1684570250027](image/README/1684570250027.png)
+<div align="center"> ![1684570250027](image/README/1684570250027.png) </div>
 
 <p id="description">Gesture Hero is a hand gesture classification system that's build to differentiate between hand gestures representing numbers from 0-5.</p>
 
@@ -67,7 +66,7 @@ Technologies used in the project:
 | ![1684570608379](image/README/1684570608379.png) | ![1684570558000](image/README/1684570558000.png) |
 | ![1684570563967](image/README/1684570563967.png) | ![1684570580475](image/README/1684570580475.png) |
 
-<h2>🏋️Model training and performance analysis </h2>
+<h2>💪🏻 Model training and performance analysis </h2>
 
 <p> The chosen model is a support vector machine (SVM) with an RBF kernel, trianed on the HOG extracted features.
 
