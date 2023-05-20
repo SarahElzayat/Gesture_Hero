@@ -45,9 +45,9 @@ Technologies used in the project:
 
 ![1684571380892](image/README/1684571380892.png)
 
-<h2> 🎞️ Preprocessing
+<h2> 🎞️ Preprocessing </h2>
 
-<p> Gesture Hero's strongest point is its preprocessing. By applying classical image processing techniques to preprocess the data for removing shadows, enhancing colors, clipping the area surrounding the hand, rotating so all hands would be pointing in the same direction and resizing for efficiency.
+<p> Gesture Hero's strongest point is its preprocessing. By applying classical image processing techniques to preprocess the data for removing shadows, enhancing colors, clipping the area surrounding the hand, rotating so all hands would be pointing in the same direction and resizing for efficiency. </p>
 <p>The main preprocessing approach taking is ignoring/ eliminating the channels with misleading information, mainly the ones that represent the illumination.
 <p>Segmentation is done using the YCRB channels using a basic thresholding and ignoring the Y(illumination channel), then cropping the photo to only contain the hand by finding the maximum contours surrounding the hand. 
 <p> To unify the orientations of hands, the preprocessed image is passed to a function to flip it so that the fingers are pointing to the left, based on the histogram of the image, the more dense half represents the palm while the other represents the fingers.
@@ -58,7 +58,7 @@ Technologies used in the project:
 | ![1684569753377](image/README/1684569753377.png) | ![1684569906290](image/README/1684569906290.png) |
 | ![1684570066053](image/README/1684570066053.png) | ![1684570109112](image/README/1684570109112.png) |
 
-<h2>🪶 Feature extraction
+<h2>🪶 Feature extraction </h2>
 
 <p> The main feature descriptor used is the Histogram of Gradients (HOG), since it’s robust to variations in appearance, computationally efficient, its discriminative power as it’s very efficient in capturing the distinguishing features of an object, and lastly its compatibility with machine learning algorithms.
 
@@ -67,7 +67,7 @@ Technologies used in the project:
 | ![1684570608379](image/README/1684570608379.png) | ![1684570558000](image/README/1684570558000.png) |
 | ![1684570563967](image/README/1684570563967.png) | ![1684570580475](image/README/1684570580475.png) |
 
-<h2>🏋️Model training and performance analysis
+<h2>🏋️Model training and performance analysis </h2>
 
 <p> The chosen model is a support vector machine (SVM) with an RBF kernel, trianed on the HOG extracted features.
 
@@ -82,7 +82,7 @@ Technologies used in the project:
 
 ![1684571178913](image/README/1684571178913.png)
 
-<h2> 👥 Collaborators
+<h2> 👥 Collaborators </h2>
 
 | [Sarah Elzayat](https://github.com/SarahElzayat) | [Ahmed ata abdallah](https://github.com/Ahmed-ata112) | **[Doaa Magdy](https://github.com/doaamagdy2024)** | **[Rufaida Kassem](https://github.com/Rufaida-Kassem)** |
 | --------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------- |
