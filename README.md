@@ -1,5 +1,9 @@
 # Hand Gesture Classification
+<<<<<<< HEAD
 the competetion files arre in the compete Folder
+=======
+
+>>>>>>> e8ded7ac0a63db24348cd2c12f90aecb5b3cec50
 ### Requirements and packages installation
 
 ```
