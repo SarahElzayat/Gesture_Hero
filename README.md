@@ -2,7 +2,7 @@
 <h1 align="center" id="title">Gesture Hero</h1>
 
 
-    ![1684570250027](image/README/1684570250027.png)
+![1684570250027](image/README/1684570250027.png)
 
 <p id="description">Gesture Hero is a hand gesture classification system that's build to differentiate between hand gestures representing numbers from 0-5.</p>
 
