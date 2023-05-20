@@ -9,7 +9,6 @@ import numpy as np
 # import cv2
 import cv2 as cv2
 # import cv2.cv2 as cv2
-
 from scipy import ndimage as ndi
 import imageio
 from os import walk
@@ -175,7 +174,7 @@ def HOG_PCA():
         r"./Feature-Extraction/Histogram-of-Oriented-Gradients-PCA.txt", "w")
     name_HOG = data_HOG.iloc[:, 0]
     value_HOG = data_HOG.iloc[:, 1:-1]
-    tag_HOG = data_HOG.iloc[:, -1]  # 0,1,2,3,4,5
+    tag_HOG = data_HOG.iloc[:, -1]  
     print("PCA")
     pca = PCA(0.97).fit(value_HOG)
     joblib.dump(pca, r"./Feature-Extraction/pca.pkl")
@@ -193,7 +192,7 @@ def HOG_PCA():
 def HOG():
     print("HOG\n")
     file = open(r"./Feature-Extraction/Histogram-of-Oriented-Gradients.txt", "w")
-    lstFiles = []  # nombre de imagenes
+    lstFiles = [] 
     path = r"./Image-Segmentation"
     for (path, _, archivos) in walk(path):
         for arch in archivos:
@@ -252,7 +251,7 @@ HOG_PCA()
 def LBP_HOG():
     # here we will combine the lbp and hog features in one feature vector
     file = open(r"./Feature-Extraction/Histogram-of-Oriented-Gradients.txt", "w")
-    lstFiles = []  # nombre de imagenes
+    lstFiles = [] 
     labels = []
     feature_vectors = []
     path = r"./Image-Segmentation/"
@@ -299,9 +298,6 @@ feature_vector, labels = LBP_HOG()
 
 base = "./"
 
-# As Tecer method of classification we use Neural Networks
-
-
 def TRY_classifiers(txt, test):
     # create folder Classifiers if not exist
     if not os.path.exists(base + 'Classifiers/'):
@@ -311,9 +307,8 @@ def TRY_classifiers(txt, test):
                        txt+'.txt', sep=',', header=None)
     data = shuffle(data, random_state=0)
 
-    s = data.shape  # tamaño de dataframe
+    s = data.shape
     col = []
-    # data.columns = ["a", "b", "c", "etc."]
 
     for x in range(0, s[1]):
         if x == 0:
@@ -323,7 +318,6 @@ def TRY_classifiers(txt, test):
         else:
             col.append("VALOR-"+str(x))
 
-    # se asigna el vector con los nombres de las columnas creado previamente y se las asignamos a la tabla
     data.columns = col
 
     # print(data.groupby(['TAG'])['TAG'].count())
@@ -409,16 +403,6 @@ def TRY_classifiers(txt, test):
     print("Predicting times")
     for i in range(len(names)): 
         print(names[i] + ": " + str(predicts_times[i]))
-    # draw the times with the corresponding tags
-    plt.figure(figsize=(5, 5))
-    plt.title("Fitting times")
-    plt.bar(names, [fits_times[i][0] for i in range(len(names))])
-    plt.savefig(base + r'Classifiers/Fitting_times.png')
-    plt.figure(figsize=(5, 5))
-    plt.title("Predicting times")
-    plt.bar(names, [predicts_times[i][0] for i in range(len(names))])
-    plt.savefig(base + r'Classifiers/Predicting_times.png')
-    
     
     # voting classifier
     # clf1 = ('svm',svm.SVC(kernel='poly',probability=True))

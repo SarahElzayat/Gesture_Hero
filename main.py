@@ -49,7 +49,7 @@ def preprocess(img_rgb):
 
 out_labels_file = r'results.txt'
 out_time_file = r'time.txt'
-path_to_data = "test_data_2/"
+path_to_data = "data"
 
 clf = joblib.load(r'SVM-POLY.pkl')
 clf_3_4 = joblib.load(r'SVM-POLY_2_3_4.pkl')
@@ -63,6 +63,8 @@ def DoItAll():
     times = []
     for imagePath in os.listdir(path_to_data):
         p = os.path.join(path_to_data, imagePath)
+        if(imghdr.what(p) == None):
+            continue
         time_start = time.time()
         try:
             img_rgb = cv2.imread(p)
