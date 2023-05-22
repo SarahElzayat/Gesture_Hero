@@ -4,6 +4,7 @@
 ![1684570250027](image/README/1684570250027.png)
 
 <p id="description">Gesture Hero is a hand gesture classification system that's build to differentiate between hand gestures representing numbers from 0-5.</p>
+<p> This project ranked 2nd place among 20 teams with 79% accuracy, tested on unseen dataset. </p>
 
 <h2>🛠️ Installation Steps:</h2>
 
